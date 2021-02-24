@@ -30,7 +30,7 @@
             "request": "launch",
             "mainClass": "com.interpreter.tool.GenerateAst",
             "projectName": "jlox_6d94333c",
-            "args": "~/Development/jlox/src/com/interpreter/lox"
+            "args": "${workspaceFolder}/src/com/interpreter/lox"
         }
     ]
 }
