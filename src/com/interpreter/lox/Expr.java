@@ -3,6 +3,9 @@ package com.interpreter.lox;
 import java.util.List;
 
 abstract class Expr {
+    /**
+     * visitor pattern
+     */
   interface Visitor<R> {
     R visitBinaryExpr(Binary expr);
     R visitGroupingExpr(Grouping expr);
