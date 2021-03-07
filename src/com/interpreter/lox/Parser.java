@@ -2,9 +2,12 @@ package com.interpreter.lox;
 
 import java.util.List;
 
+import com.interpreter.lox.Expr.Conditional;
+
 /**
  * expression     → equality ;
- * equality       → comparison ( ( "!=" | "==" ) comparison )* ;
+ * equality       → conditional ( ( "!=" | "==" ) conditional )* ;
+ * conditional    → comparison ( "?" conditional ":" conditional )?;
  * comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
  * term           → factor ( ( "-" | "+" ) factor )* ;
  * factor         → unary ( ( "/" | "*" ) unary )* ;
@@ -37,12 +40,25 @@ public class Parser {
     }
 
     private Expr equality() {
-        Expr expr = comparison();
+        Expr expr = conditional();
 
         while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
             Token operator = previous();
-            Expr right = comparison();
+            Expr right = conditional();
             expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    private Expr conditional() {
+        Expr expr = comparison();
+
+        if(match(TokenType.INTERROGATION)) {
+            Expr expr1 = conditional();
+            consume(TokenType.COLON, "Expect ':' after '?'");
+            Expr expr2 = conditional();
+            expr = new Expr.Conditional(expr, expr1, expr2);
         }
 
         return expr;

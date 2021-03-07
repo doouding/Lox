@@ -1,7 +1,5 @@
 package com.interpreter.lox;
 
-import java.util.List;
-
 abstract class Expr {
     /**
      * visitor pattern
@@ -11,6 +9,7 @@ abstract class Expr {
     R visitGroupingExpr(Grouping expr);
     R visitLiteralExpr(Literal expr);
     R visitUnaryExpr(Unary expr);
+    R visitConditionalExpr(Conditional expr);
   }
 
   static class Binary extends Expr {
@@ -66,6 +65,23 @@ abstract class Expr {
 
     final Token operator;
     final Expr right;
+  }
+
+  static class Conditional extends Expr {
+      Expr condition;
+      Expr stat1;
+      Expr stat2;
+
+      Conditional(Expr conditon, Expr stat1, Expr stat2) {
+          this.condition = conditon;
+          this.stat1 = stat1;
+          this.stat2 = stat2;
+      }
+
+      @Override
+      <R> R accept(Visitor<R> visitor) {
+          return visitor.visitConditionalExpr(this);
+      }
   }
 
   abstract <R> R accept(Visitor<R> visitor);

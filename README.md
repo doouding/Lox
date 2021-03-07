@@ -18,4 +18,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
 ## Todo
 
  - [ ] Add support for comma operator
- - [ ] Add support for ternary operator `?:`
+ - [x] Add support for ternary operator `?:`
