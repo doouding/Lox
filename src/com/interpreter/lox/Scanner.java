@@ -122,7 +122,9 @@ public class Scanner {
                 } else if (isAlpha(c)) {
                     identifier();
                 }
-                Lox.error(line, "Unexpected character.");
+                else {
+                    Lox.error(line, "Unexpected character.");
+                }
                 break;
         }
     }

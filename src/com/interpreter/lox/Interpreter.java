@@ -11,10 +11,6 @@ class Interpreter implements Expr.Visitor<Object> {
         return evaluate(expr.expression);
     }
 
-    private Object evaluate(Expr expr) {
-        return expr.accept(this);
-    }
-
     @Override
     public Object visitUnaryExpr(Expr.Unary expr) {
         Object right = evaluate(expr.right);
@@ -28,12 +24,6 @@ class Interpreter implements Expr.Visitor<Object> {
             default:
                 return null;
         }
-    }
-
-    public boolean isTruthy(Object object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return (boolean)object;
-        return true;
     }
 
     @Override
@@ -80,8 +70,12 @@ class Interpreter implements Expr.Visitor<Object> {
             default:
                 return null;
         }
+    }
 
-        return null;
+    public boolean isTruthy(Object object) {
+        if (object == null) return false;
+        if (object instanceof Boolean) return (boolean)object;
+        return true;
     }
 
     private boolean isEqual(Object a, Object b) {
@@ -100,5 +94,37 @@ class Interpreter implements Expr.Visitor<Object> {
         if(left instanceof Double && right instanceof Double) return;
 
         throw new RuntimeError(operator, "Operands must be numbers");
+    }
+
+    /**
+     * evaluate expression and print its stringifyed result
+     * @param expression Expression to evaluate
+     */
+    void interprete(Expr expression) {
+        try {
+            Object value = evaluate(expression);
+            System.out.println(stringify(value));
+        } catch (RuntimeError error) {
+            Lox.runtimeError(error);
+        }
+    }
+
+    private Object evaluate(Expr expr) {
+        return expr.accept(this);
+    }
+
+    private String stringify(Object object) {
+        if (object == null) return "nil";
+
+        if (object instanceof Double) {
+            String text = object.toString();
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+
+            return text;
+        }
+
+        return object.toString();
     }
 }
