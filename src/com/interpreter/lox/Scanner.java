@@ -161,7 +161,7 @@ public class Scanner {
         TokenType type = keywords.get(text);
 
         if(type == null) type = TokenType.IDENTIFIER;
-        addToken(TokenType.IDENTIFIER);
+        addToken(type);
     }
 
     private boolean isAlphaNumeric(char c) {

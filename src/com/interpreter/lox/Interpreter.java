@@ -1,6 +1,8 @@
 package com.interpreter.lox;
 
-class Interpreter implements Expr.Visitor<Object> {
+import java.util.List;
+
+class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
@@ -84,6 +86,19 @@ class Interpreter implements Expr.Visitor<Object> {
         }
     }
 
+    @Override
+    public Void visitExpressionStmt(Stmt.Expression exprStmt) {
+        evaluate(exprStmt.expression);
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Stmt.Print stmt) {
+        Object value = evaluate(stmt.expression);
+        System.out.println(stringify(value));
+        return null;
+    }
+
     public boolean isTruthy(Object object) {
         if (object == null) return false;
         if (object instanceof Boolean) return (boolean)object;
@@ -109,16 +124,21 @@ class Interpreter implements Expr.Visitor<Object> {
     }
 
     /**
-     * evaluate expression and print its stringifyed result
-     * @param expression Expression to evaluate
+     * evaluate statements
+     * @param statements Expression to evaluate
      */
-    void interprete(Expr expression) {
+    void interprete(List<Stmt> statements) {
         try {
-            Object value = evaluate(expression);
-            System.out.println(stringify(value));
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
         }
+    }
+
+    private void execute(Stmt stmt) {
+        stmt.accept(this);
     }
 
     private Object evaluate(Expr expr) {
