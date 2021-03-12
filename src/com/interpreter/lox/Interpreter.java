@@ -6,6 +6,20 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Enviroment enviroment = new Enviroment();
 
     @Override
+    public Object visitAssignExpr(Expr.Assign expr) {
+        Object value = evaluate(expr.value);
+        enviroment.assign(expr.name, value);
+
+        return value;
+    }
+
+    @Override
+    public Void visitBlockStmt(Stmt.Block stmt) {
+        executeBlock(stmt.statements, new Enviroment(enviroment));
+        return null;
+    }
+
+    @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
     }
@@ -115,6 +129,20 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitVariableExpr(Expr.Variable expr) {
         return enviroment.get(expr.name);
+    }
+
+    void executeBlock(List<Stmt> statements, Enviroment environment) {
+        Enviroment previous = this.enviroment;
+
+        try {
+            this.enviroment = environment;
+
+            for (Stmt statement : statements) {
+                execute(statement);
+            }
+        } finally {
+            this.enviroment = previous;
+        }
     }
 
     public boolean isTruthy(Object object) {
