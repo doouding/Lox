@@ -103,7 +103,16 @@ public class Parser {
 
     private Stmt expressionStatement() {
         Expr expr = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+
+        if(!check(TokenType.SEMICOLON)) {
+            if(!Lox.isREPL) {
+                throw error(peek(), "Expect ';' after expression.");
+            }
+        }
+        else {
+            advance();
+        }
+
         return new Stmt.Expression(expr);
     }
 
