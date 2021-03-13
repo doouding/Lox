@@ -12,6 +12,7 @@ public class Lox {
     private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
+    static boolean isREPL = false;
 
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
@@ -76,9 +77,11 @@ public class Lox {
             System.exit(64);
         }
         else if (args.length == 1) {
+            isREPL = false;
             runFile(args[0]);
         }
         else {
+            isREPL = true;
             runPrompt();
         }
     }
