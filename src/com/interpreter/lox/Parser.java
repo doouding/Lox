@@ -14,8 +14,12 @@ import com.interpreter.lox.Expr.Conditional;
  * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * 
  * statement      → exprStmt ;
+ *                | ifStmt;
  *                | printStmt ;
+ *                | block;
  * 
+ * ifStmt         → "if" "(" expression ")" statement
+ *                  ("else" statement )? ;
  * exprStmt       → expression ";";
  * printStmt      → "print" expression ";";
  *
@@ -23,6 +27,8 @@ import com.interpreter.lox.Expr.Conditional;
  * assignment     → IDENTIFIER "=" assignment
  *                | equality
  *
+ * logic_or       → logic_and ( "or" logic_and )* ;
+ * logic_and      → equality ( "and" equality )* ;
  * equality       → conditional ( ( "!=" | "==" ) conditional )* ;
  * conditional    → comparison ( "?" conditional ":" conditional )?;
  * comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -78,10 +84,25 @@ public class Parser {
     }
 
     private Stmt statement() {
+        if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.PRINT)) return printStatement();
         if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt ifStatement() {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after condition");
+        Expr condition = expression();
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
+
+        Stmt thenBranchStatement = statement();
+        Stmt elseBranchStatement = null;
+        if(match(TokenType.ELSE)) {
+            elseBranchStatement = statement();
+        }
+
+        return new Stmt.If(condition, thenBranchStatement, elseBranchStatement);
     }
 
     private List<Stmt> block() {
@@ -121,7 +142,7 @@ public class Parser {
     }
 
     private Expr assignment() {
-        Expr expr = equality();
+        Expr expr = or();
 
         if(match(TokenType.EQUAL)) {
             Token equals = previous();
@@ -136,6 +157,30 @@ public class Parser {
         }
 
         return expr;
+    }
+
+    private Expr or() {
+        Expr and = and();
+
+        while(match(TokenType.OR)) {
+            Token operator = previous();
+            Expr right = and();
+            and = new Expr.Logical(and, operator, right);
+        }
+
+        return and;
+    }
+
+    private Expr and() {
+        Expr equality = equality();
+
+        while(match(TokenType.AND)) {
+            Token operator = previous();
+            Expr right = equality();
+            equality = new Expr.Logical(equality, operator, right);
+        }
+
+        return equality;
     }
 
     private Expr equality() {

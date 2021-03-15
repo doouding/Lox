@@ -6,6 +6,39 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Enviroment enviroment = new Enviroment();
 
     @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+        boolean leftTruethy = isTruthy(left);
+
+        if(expr.operator.type == TokenType.AND) {
+            if(leftTruethy) {
+                return evaluate(expr.right);
+            }
+
+            return left;
+        }
+        else if(leftTruethy){
+            return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
+    @Override
+    public Void visitIfStmt(Stmt.If statement) {
+        Object value = evaluate(statement.condition);
+
+        if(isTruthy(value)){
+            execute(statement.thenBranch);
+        }
+        else if(statement.elseBranch != null) {
+            execute(statement.elseBranch);
+        }
+
+        return null;
+    }
+
+    @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
         enviroment.assign(expr.name, value);
