@@ -10,6 +10,7 @@ abstract class Stmt {
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
     R visitWhileStmt(While stmt);
+    R visitLoopIdentStmt(LoopIdent stmt);
   }
 
   static class Block extends Stmt {
@@ -91,6 +92,18 @@ abstract class Stmt {
 
     final Expr condition;
     final Stmt loopStatement;
+  }
+  static class LoopIdent extends Stmt {
+    LoopIdent(Token identifier) {
+      this.identifier = identifier;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitLoopIdentStmt(this);
+    }
+
+    final Token identifier;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

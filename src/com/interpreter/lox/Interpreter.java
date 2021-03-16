@@ -6,9 +6,26 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Enviroment enviroment = new Enviroment();
 
     @Override
+    public Void visitLoopIdentStmt(Stmt.LoopIdent statement) {
+        throw new RuntimeError(statement.identifier, "");
+    }
+
+    @Override
     public Void visitWhileStmt(Stmt.While statement) {
         while(isTruthy(evaluate(statement.condition))) {
-            execute(statement.loopStatement);
+            try {
+                execute(statement.loopStatement);
+            } catch(RuntimeError e) {
+                if(e.token.type == TokenType.BREAK) {
+                    break;
+                }
+                else if (e.token.type == TokenType.CONTINUE) {
+                    continue;
+                }
+                else {
+                    throw e;
+                }
+            }
         }
 
         return null;

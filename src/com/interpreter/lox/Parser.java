@@ -6,20 +6,33 @@ import java.util.List;
 import com.interpreter.lox.Expr.Conditional;
 
 /**
- * program        → statement* EOF ;
+ * program        → declaration* EOF ;
  *
  * declaration    → varDecl
  *                | statement ;
  * 
  * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * 
- * statement      → exprStmt
+ * baseStatement  → exprStmt
  *                | ifStmt
  *                | printStmt
- *                | whileStmt
- *                | block;
- * 
- * whileStmt      → "while" "(" expression ")" statement;
+ *                | whileStmt ;
+ *
+ * statement      → block
+ *                | baseStatement ;
+ *
+ * loopDecl       → varDecl
+ *                | loopStatement ;
+ *
+ * loopStatement  → loopIdent
+ *                | loopBlock
+ *                | baseStatement ;
+ *
+ * loopBlock      → "{" loopDecl* "}" ;
+ * loopIdent      → "break" | "continue" ;
+ *
+ * block          → "{" declaration* "}" ;
+ * whileStmt      → "while" "(" expression ")" loopStatement;
  * ifStmt         → "if" "(" expression ")" statement
  *                  ("else" statement )? ;
  * exprStmt       → expression ";";
@@ -62,6 +75,17 @@ public class Parser {
         return statements;
     }
 
+    private Stmt loopDeclaration() {
+        try {
+            if (match(TokenType.VAR)) return varDeclaration();
+
+            return loopStatement();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+
     private Stmt declaration() {
         try {
             if (match(TokenType.VAR)) return varDeclaration();
@@ -85,13 +109,31 @@ public class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    private Stmt statement() {
+    private Stmt baseStatement() {
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.PRINT)) return printStatement();
-        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
+    }
+
+    private Stmt statement() {
+        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
+
+        return baseStatement();
+    }
+
+    private Stmt loopStatement() {
+        if (match(TokenType.BREAK, TokenType.CONTINUE)) {
+            Token token = previous();
+            consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+
+            return new Stmt.LoopIdent(token);
+        };
+
+        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(loopBlock());
+
+        return baseStatement();
     }
 
     private Stmt ifStatement() {
@@ -113,18 +155,31 @@ public class Parser {
         Expr condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
 
-        Stmt loopStatement = statement();
+        Stmt loopStatement = loopStatement();
 
         return new Stmt.While(condition, loopStatement);
+    }
+
+    private List<Stmt> loopBlock() {
+        List<Stmt> statements = new ArrayList<>();
+
+        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            statements.add(loopDeclaration());
+        }
+
+        System.out.println("loopBlock");
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
     }
 
     private List<Stmt> block() {
         List<Stmt> statements = new ArrayList<>();
 
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-        statements.add(declaration());
+            statements.add(declaration());
         }
 
+        System.out.println("block");
         consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
         return statements;
     }
@@ -295,6 +350,11 @@ public class Parser {
             Expr expr = expression();
             consume(TokenType.RIGHT_PAREN, "Expec ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+
+        if(match(TokenType.BREAK, TokenType.CONTINUE)) {
+            Token token = previous();
+            throw error(previous(), "Illegal " + token.lexeme + " statement");
         }
 
         throw error(peek(), "Expect expression.");
