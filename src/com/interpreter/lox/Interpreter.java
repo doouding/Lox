@@ -6,6 +6,15 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private Enviroment enviroment = new Enviroment();
 
     @Override
+    public Void visitWhileStmt(Stmt.While statement) {
+        while(isTruthy(evaluate(statement.condition))) {
+            execute(statement.loopStatement);
+        }
+
+        return null;
+    }
+
+    @Override
     public Object visitLogicalExpr(Expr.Logical expr) {
         Object left = evaluate(expr.left);
         boolean leftTruethy = isTruthy(left);
