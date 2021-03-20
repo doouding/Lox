@@ -133,7 +133,10 @@ public class Parser {
             initializer = expression();
         }
 
-        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        if(shouldConsumeSemicolon()) {
+            consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        }
+
         return new Stmt.Var(name, initializer);
     }
 
@@ -213,23 +216,27 @@ public class Parser {
 
     private Stmt printStatement() {
         Expr value = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+
+        if(shouldConsumeSemicolon()) {
+            consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        }
+
         return new Stmt.Print(value);
     }
 
     private Stmt expressionStatement() {
         Expr expr = expression();
 
-        if(!check(TokenType.SEMICOLON)) {
-            if(!Lox.isREPL) {
-                throw error(peek(), "Expect ';' after expression.");
-            }
-        }
-        else {
-            advance();
+        if(shouldConsumeSemicolon()) {
+            consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+            return new Stmt.Expression(expr);
         }
 
-        return new Stmt.Expression(expr);
+        return new Stmt.Print(expr);
+    }
+
+    private Boolean shouldConsumeSemicolon() {
+        return !Lox.isREPL || !isAtEnd();
     }
 
     private Expr expression() {
