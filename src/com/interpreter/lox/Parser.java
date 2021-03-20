@@ -11,6 +11,9 @@ import com.interpreter.lox.Expr.Conditional;
  * declaration    → varDecl
  *                | funDecl
  *                | statement ;
+ *
+ * loopDecl       → varDecl
+ *                | loopStatement ;
  * 
  * funDecl        → "fun" function ;
  * function       → IDENTIFIER "(" parameters? ")" block ;
@@ -20,13 +23,11 @@ import com.interpreter.lox.Expr.Conditional;
  * baseStatement  → exprStmt
  *                | ifStmt
  *                | printStmt
- *                | whileStmt ;
+ *                | whileStmt
+ *                | returnStmt ;
  *
  * statement      → block
  *                | baseStatement ;
- *
- * loopDecl       → varDecl
- *                | loopStatement ;
  *
  * loopStatement  → loopIdent
  *                | loopBlock
@@ -36,6 +37,8 @@ import com.interpreter.lox.Expr.Conditional;
  * loopIdent      → "break" | "continue" ;
  *
  * block          → "{" declaration* "}" ;
+ *
+ * returnStmt     → "return" expression? ";" ;
  * whileStmt      → "while" "(" expression ")" loopStatement;
  * ifStmt         → "if" "(" expression ")" statement
  *                  ("else" statement )? ;
@@ -144,6 +147,7 @@ public class Parser {
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.PRINT)) return printStatement();
+        if (match(TokenType.RETURN)) return returnStatement();
 
         return expressionStatement();
     }
@@ -165,6 +169,18 @@ public class Parser {
         if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(loopBlock());
 
         return baseStatement();
+    }
+
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr value = null;
+
+        if(!check(TokenType.SEMICOLON)) {
+            value = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expect ';' after return statement");
+        return new Stmt.Return(keyword, value);
     }
 
     private Stmt ifStatement() {
