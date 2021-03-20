@@ -20,5 +20,5 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Add support for comma operator
  - [x] Add support for ternary operator `?:`
  - [x] Add support for `break` and `continue` in loop
- - [ ] Add support for closure
+ - [x] Add support for closure function
  - [x] Add support for ommiting semicolon in repl mode
