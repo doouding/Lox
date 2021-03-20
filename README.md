@@ -25,3 +25,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Support return function directly
  - [ ] Support anonymous function
  - [ ] Support `--` and `++` operator
+ - [ ] Wrap with readline
