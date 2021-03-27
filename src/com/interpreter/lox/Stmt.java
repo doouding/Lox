@@ -11,7 +11,7 @@ abstract class Stmt {
     R visitPrintStmt(Print stmt);
     R visitVarStmt(Var stmt);
     R visitWhileStmt(While stmt);
-    R visitLoopIdentStmt(LoopIdent stmt);
+    R visitTerminateStmt(Terminate stmt);
     R visitFunctionStmt(Function stmt);
   }
 
@@ -109,14 +109,14 @@ abstract class Stmt {
     final Expr condition;
     final Stmt loopStatement;
   }
-  static class LoopIdent extends Stmt {
-    LoopIdent(Token identifier) {
+  static class Terminate extends Stmt {
+    Terminate(Token identifier) {
       this.identifier = identifier;
     }
 
     @Override
     <R> R accept(Visitor<R> visitor) {
-      return visitor.visitLoopIdentStmt(this);
+      return visitor.visitTerminateStmt(this);
     }
 
     final Token identifier;

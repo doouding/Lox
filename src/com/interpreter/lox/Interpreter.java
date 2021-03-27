@@ -60,8 +60,8 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitLoopIdentStmt(Stmt.LoopIdent statement) {
-        throw new RuntimeError(statement.identifier, "");
+    public Void visitTerminateStmt(Stmt.Terminate statement) {
+        throw new Terminate(statement.identifier);
     }
 
     @Override
@@ -69,15 +69,12 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         while(isTruthy(evaluate(statement.condition))) {
             try {
                 execute(statement.loopStatement);
-            } catch(RuntimeError e) {
+            } catch(Terminate e) {
                 if(e.token.type == TokenType.BREAK) {
                     break;
                 }
                 else if (e.token.type == TokenType.CONTINUE) {
                     continue;
-                }
-                else {
-                    throw e;
                 }
             }
         }

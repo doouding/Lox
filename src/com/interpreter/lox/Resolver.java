@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import com.interpreter.lox.Stmt.Function;
-
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
+    private boolean insideLoop = false;
 
     Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -31,7 +30,11 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     @Override
-    public Void visitLoopIdentStmt(Stmt.LoopIdent stmt) {
+    public Void visitTerminateStmt(Stmt.Terminate stmt) {
+        if(insideLoop == false) {
+            Lox.error(stmt.identifier, stmt.identifier.lexeme + " must used inside loop");
+        }
+
         return null;
     }
 
@@ -118,7 +121,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         resolve(stmt.condition);
+        insideLoop = true;
         resolve(stmt.loopStatement);
+        insideLoop = false;
 
         return null;
     }

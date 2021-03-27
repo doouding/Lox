@@ -3,47 +3,35 @@ package com.interpreter.lox;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.interpreter.lox.Expr.Conditional;
-
 /**
  * program        → declaration* EOF ;
  *
  * declaration    → varDecl
  *                | funDecl
  *                | statement ;
- *
- * loopDecl       → varDecl
- *                | loopStatement ;
  * 
+ * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
+ *
  * funDecl        → "fun" function ;
  * function       → IDENTIFIER "(" parameters? ")" block ;
  * parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
- * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * 
- * baseStatement  → exprStmt
+ * statement      → exprStmt
  *                | ifStmt
  *                | printStmt
  *                | whileStmt
- *                | returnStmt ;
- *
- * statement      → block
- *                | baseStatement ;
- *
- * loopStatement  → loopIdent
- *                | loopBlock
- *                | baseStatement ;
- *
- * loopBlock      → "{" loopDecl* "}" ;
- * loopIdent      → "break" | "continue" ;
+ *                | returnStmt
+ *                | terminateStmt
+ *                | block ;
  *
  * block          → "{" declaration* "}" ;
- *
+ * terminateStmt  → "break" | "continue" ;
  * returnStmt     → "return" expression? ";" ;
- * whileStmt      → "while" "(" expression ")" loopStatement;
+ * whileStmt      → "while" "(" expression ")" statement;
  * ifStmt         → "if" "(" expression ")" statement
  *                  ("else" statement )? ;
- * exprStmt       → expression ";";
  * printStmt      → "print" expression ";";
+ * exprStmt       → expression ";";
  *
  * expression     → equality ;
  * assignment     → IDENTIFIER "=" assignment
@@ -82,17 +70,6 @@ public class Parser {
         }
 
         return statements;
-    }
-
-    private Stmt loopDeclaration() {
-        try {
-            if (match(TokenType.VAR)) return varDeclaration();
-
-            return loopStatement();
-        } catch (ParseError error) {
-            synchronize();
-            return null;
-        }
     }
 
     private Stmt declaration() {
@@ -143,32 +120,23 @@ public class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    private Stmt baseStatement() {
+    private Stmt statement() {
         if (match(TokenType.IF)) return ifStatement();
         if (match(TokenType.WHILE)) return whileStatement();
         if (match(TokenType.PRINT)) return printStatement();
         if (match(TokenType.RETURN)) return returnStatement();
+        if (match(TokenType.CONTINUE, TokenType.BREAK)) return terminateStatement();
+        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
 
         return expressionStatement();
     }
 
-    private Stmt statement() {
-        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(block());
+    private Stmt terminateStatement() {
+        Token token = previous();
 
-        return baseStatement();
-    }
+        consume(TokenType.SEMICOLON, "Expect ';' after " + token.lexeme + " statement");
 
-    private Stmt loopStatement() {
-        if (match(TokenType.BREAK, TokenType.CONTINUE)) {
-            Token token = previous();
-            consume(TokenType.SEMICOLON, "Expect ';' after expression.");
-
-            return new Stmt.LoopIdent(token);
-        };
-
-        if (match(TokenType.LEFT_BRACE)) return new Stmt.Block(loopBlock());
-
-        return baseStatement();
+        return new Stmt.Terminate(token);
     }
 
     private Stmt returnStatement() {
@@ -202,21 +170,9 @@ public class Parser {
         Expr condition = expression();
         consume(TokenType.RIGHT_PAREN, "Expect ')' after condition");
 
-        Stmt loopStatement = loopStatement();
+        Stmt statements = statement();
 
-        return new Stmt.While(condition, loopStatement);
-    }
-
-    private List<Stmt> loopBlock() {
-        List<Stmt> statements = new ArrayList<>();
-
-        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(loopDeclaration());
-        }
-
-        System.out.println("loopBlock");
-        consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
-        return statements;
+        return new Stmt.While(condition, statements);
     }
 
     private List<Stmt> block() {
