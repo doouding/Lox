@@ -27,3 +27,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Support `--` and `++` operator
  - [ ] Wrap with readline
  - [x] Improve `break` and `continue` implementation
+ - [ ] Support private field in class

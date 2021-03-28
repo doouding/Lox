@@ -6,12 +6,13 @@ import java.util.List;
 /**
  * program        → declaration* EOF ;
  *
- * declaration    → varDecl
+ * declaration    → classDecl
+ *                | varDecl
  *                | funDecl
  *                | statement ;
- * 
- * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  *
+ * classDecl      → "class" IDENTIFIER "{" function* "}" ;
+ * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * funDecl        → "fun" function ;
  * function       → IDENTIFIER "(" parameters? ")" block ;
  * parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -34,8 +35,8 @@ import java.util.List;
  * exprStmt       → expression ";";
  *
  * expression     → equality ;
- * assignment     → IDENTIFIER "=" assignment
- *                | equality
+ * assignment     → ( call "." )? IDENTIFIER "=" assignment
+ *                | logic_or
  *
  * logic_or       → logic_and ( "or" logic_and )* ;
  * logic_and      → equality ( "and" equality )* ;
@@ -46,7 +47,7 @@ import java.util.List;
  * factor         → unary ( ( "/" | "*" ) unary )* ;
  * unary          → ( "!" | "-" ) unary
  *                | call ;
- * call           → primary ( "(" arguments? ")" )* ;
+ * call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
  * arguments      → expression ( "," expression )
  * primary        → NUMBER | STRING | "true" | "false" | "nil"
  *                | "(" expression ")" 
@@ -76,12 +77,28 @@ public class Parser {
         try {
             if (match(TokenType.FUN)) return function("function");
             if (match(TokenType.VAR)) return varDeclaration();
+            if (match(TokenType.CLASS)) return classDeclaration();
 
             return statement();
         } catch (ParseError error) {
             synchronize();
             return null;
         }
+    }
+
+    private Stmt classDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' after class name");
+
+        List<Stmt.Function> methods = new ArrayList<>();
+
+        while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
+            methods.add((Stmt.Function)function("method"));
+        }
+
+        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body");
+
+        return new Stmt.Class(name, methods);
     }
 
     private Stmt function(String kind) {
@@ -225,6 +242,10 @@ public class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable)expr).name;
                 return new Expr.Assign(name, value);
+            } if (expr instanceof Expr.Set) {
+                Expr.Get get = (Expr.Get)expr;
+
+                return new Expr.Set(get.object, equals, value);
             }
 
             error(equals, "Invalid assignment target.");
@@ -345,6 +366,10 @@ public class Parser {
         while (true) {
             if(match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
+            } else if (match(TokenType.DOT)) {
+                Token name = consume(TokenType.IDENTIFIER,
+                    "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }

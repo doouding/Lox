@@ -17,6 +17,8 @@ public class GenerateAst {
             "Assign      : Token name, Expr value",
             "Binary      : Expr left, Token operator, Expr right",
             "Call        : Expr callee, Token paren, List<Expr> arguments",
+            "Get         : Expr object, Token name",
+            "Set         : Expr object, Token name, Expr value",
             "Grouping    : Expr expression",
             "Literal     : Object value",
             "Unary       : Token operator, Expr right",
@@ -34,7 +36,8 @@ public class GenerateAst {
             "Var        : Token name, Expr initializer",
             "While      : Expr condition, Stmt loopStatement",
             "Terminate  : Token identifier",
-            "Function   : Token name, List<Token> params, List<Stmt> body"
+            "Function   : Token name, List<Token> params, List<Stmt> body",
+            "Class      : Token name, List<Stmt.Function> methods"
         ));
     }
 
