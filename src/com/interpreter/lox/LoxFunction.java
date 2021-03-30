@@ -11,6 +11,12 @@ public class LoxFunction implements LoxCallable {
         this.declaration = declaration;
     }
 
+    LoxFunction bind(LoxInstance instance) {
+        Enviroment enviroment = new Enviroment(cloure);
+        enviroment.define("this", instance);
+        return new LoxFunction(declaration, enviroment);
+    }
+
     @Override
     public String toString() {
         return "<fn" + declaration.name.lexeme + ">";
