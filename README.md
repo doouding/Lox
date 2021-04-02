@@ -28,3 +28,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Wrap with readline
  - [x] Improve `break` and `continue` implementation
  - [ ] Support private field in class
+ - [ ] `break` and `contine may have some bug in nested block`
