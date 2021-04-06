@@ -250,6 +250,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void declare(Token name) {
+        // We gonna skip the declare when the scopes are empty
+        // 'case that means we are in the global scope
+        // and variable in global scope is more dynamic so we won't resolve thme
         if (scopes.isEmpty()) return;
 
         Map<String, Boolean> scope = scopes.peek();
