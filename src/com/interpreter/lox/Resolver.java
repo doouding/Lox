@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import com.interpreter.lox.Stmt.Var;
+
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
-    private final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private final Stack<Map<String, VariableMeta>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
     private ClassType currentClass = ClassType.NONE;
     private boolean insideLoop = false;
@@ -60,7 +62,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         define(stmt.name);
 
         beginScope();
-        scopes.peek().put("this", true);
+        scopes.peek().put("this", new VariableMeta(new Token(TokenType.THIS, "this", null, 0), false, true));
 
         for (Stmt.Function method : stmt.methods) {
             FunctionType declaration = FunctionType.METHOD;
@@ -112,9 +114,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitVariableExpr(Expr.Variable expr) {
         if (!scopes.isEmpty() &&
-            scopes.peek().get(expr.name.lexeme) == Boolean.FALSE) {
-                Lox.error(expr.name,
-                    "Can't read local variable in its own initializer.");
+            scopes.peek().get(expr.name.lexeme).hasInitialized == Boolean.FALSE) {
+                Lox.error(expr.name, "Can't read local variable in its own initializer.");
         }
 
         resolveLocal(expr, expr.name);
@@ -244,6 +245,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private void resolveLocal(Expr expr, Token name) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {
+                scopes.get(i).get(name.lexeme).hasAccessed = true;
                 interpreter.resolve(expr, scopes.size() - 1 - i);
                 return;
             }
@@ -256,18 +258,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         // and variable in global scope is more dynamic so we won't resolve thme
         if (scopes.isEmpty()) return;
 
-        Map<String, Boolean> scope = scopes.peek();
+        Map<String, VariableMeta> scope = scopes.peek();
         if (scope.containsKey(name.lexeme)) {
             Lox.error(name, "Already variable with this name in this scope.");
         }
 
-        scope.put(name.lexeme, false);
+        scope.put(name.lexeme, new VariableMeta(name, false, false));
     }
 
     private void define(Token name) {
         if(scopes.isEmpty()) return;
 
-        scopes.peek().put(name.lexeme, true);
+        VariableMeta meta = scopes.peek().get(name.lexeme);
+        meta.hasInitialized = true;
     }
 
     void resolve(List<Stmt> statements) {
@@ -285,10 +288,17 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void beginScope() {
-        scopes.push(new HashMap<String, Boolean>());
+        scopes.push(new HashMap<String, VariableMeta>());
     }
 
     private void endScope() {
-        scopes.pop();
+        Map<String, VariableMeta> scope = scopes.pop();
+
+        for(Map.Entry<String, VariableMeta> entry: scope.entrySet()) {
+            VariableMeta meta = entry.getValue();
+            if (meta.hasAccessed && meta.name.type == TokenType.THIS) {
+                Lox.error(meta.name, "Variable is defined but never used");
+            }
+        }
     }
 }

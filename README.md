@@ -29,3 +29,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [x] Improve `break` and `continue` implementation
  - [ ] Support private field in class
  - [x] `break` and `contine` may have some bug in nested block
+ - [x] Report error if local variable is never used
