@@ -174,9 +174,10 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
         resolve(stmt.condition);
+        boolean encloseLoop = insideLoop;
         insideLoop = true;
         resolve(stmt.loopStatement);
-        insideLoop = false;
+        insideLoop = encloseLoop;
 
         return null;
     }
