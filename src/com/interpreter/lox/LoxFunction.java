@@ -6,7 +6,10 @@ public class LoxFunction implements LoxCallable {
     private final Stmt.Function declaration;
     private final Enviroment cloure;
 
-    LoxFunction(Stmt.Function declaration, Enviroment enviroment) {
+    private final boolean isInitializer;
+
+    LoxFunction(Stmt.Function declaration, Enviroment enviroment, boolean isInitializer) {
+        this.isInitializer = isInitializer;
         this.cloure = enviroment;
         this.declaration = declaration;
     }
@@ -14,7 +17,7 @@ public class LoxFunction implements LoxCallable {
     LoxFunction bind(LoxInstance instance) {
         Enviroment enviroment = new Enviroment(cloure);
         enviroment.define("this", instance);
-        return new LoxFunction(declaration, enviroment);
+        return new LoxFunction(declaration, enviroment, isInitializer);
     }
 
     @Override
