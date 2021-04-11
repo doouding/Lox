@@ -38,8 +38,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             return null;
         }
 
-        if (currentFunction != FunctionType.METHOD || currentFunction != FunctionType.INITIALIZER) {
-            Lox.error(expr.keyword, "Can't use 'this' outside of a instance method");
+        if (currentFunction == FunctionType.STATIC_METHOD) {
+            Lox.error(expr.keyword, "'this' can only use inside of an instance method");
             return null;
         }
 
