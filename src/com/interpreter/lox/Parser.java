@@ -11,7 +11,7 @@ import java.util.List;
  *                | funDecl
  *                | statement ;
  *
- * classDecl      → "class" IDENTIFIER "{" function* "}" ;
+ * classDecl      → "class" IDENTIFIER "{" ("static"? function)* "}" ;
  * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * funDecl        → "fun" function ;
  * function       → IDENTIFIER "(" parameters? ")" block ;
@@ -91,14 +91,21 @@ public class Parser {
         consume(TokenType.LEFT_BRACE, "Expect '{' after class name");
 
         List<Stmt.Function> methods = new ArrayList<>();
+        List<Stmt.Function> staticMethods = new ArrayList<>();
 
         while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            methods.add((Stmt.Function)function("method"));
+            if(check(TokenType.STATIC)) {
+                advance();
+                staticMethods.add((Stmt.Function)function("staticMethod"));
+            }
+            else {
+                methods.add((Stmt.Function)function("method"));
+            }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body");
 
-        return new Stmt.Class(name, methods);
+        return new Stmt.Class(name, methods, staticMethods);
     }
 
     private Stmt function(String kind) {

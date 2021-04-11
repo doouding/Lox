@@ -51,6 +51,9 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         if (object instanceof LoxInstance) {
             return ((LoxInstance) object).get(expr.name);
         }
+        if (object instanceof LoxClass) {
+            return ((LoxClass) object).getStatic(expr.name);
+        }
 
         throw new RuntimeError(expr.name,
             "Only instances have properties.");
@@ -61,12 +64,18 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         enviroment.define(stmt.name.lexeme, null);
 
         Map<String, LoxFunction> methods = new HashMap<>();
+        Map<String, LoxFunction> staticMethods = new HashMap<>();
         for (Stmt.Function method : stmt.methods) {
             LoxFunction function = new LoxFunction(method, enviroment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
         }
 
-        LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+        for (Stmt.Function method : stmt.staticMethods) {
+            LoxFunction function = new LoxFunction(method, enviroment, false);
+            staticMethods.put(method.name.lexeme, function);
+        }
+
+        LoxClass klass = new LoxClass(stmt.name.lexeme, methods, staticMethods);
         enviroment.assign(stmt.name, klass);
         return null;
     }

@@ -139,9 +139,10 @@ abstract class Stmt {
     final List<Stmt> body;
   }
   static class Class extends Stmt {
-    Class(Token name, List<Stmt.Function> methods) {
+    Class(Token name, List<Stmt.Function> methods, List<Stmt.Function> staticMethods) {
       this.name = name;
       this.methods = methods;
+      this.staticMethods = staticMethods;
     }
 
     @Override
@@ -151,6 +152,7 @@ abstract class Stmt {
 
     final Token name;
     final List<Stmt.Function> methods;
+    final List<Stmt.Function> staticMethods;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

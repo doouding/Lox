@@ -38,7 +38,7 @@ public class GenerateAst {
             "While      : Expr condition, Stmt loopStatement",
             "Terminate  : Token identifier",
             "Function   : Token name, List<Token> params, List<Stmt> body",
-            "Class      : Token name, List<Stmt.Function> methods"
+            "Class      : Token name, List<Stmt.Function> methods, List<Stmt.Function> staticMethods"
         ));
     }
 

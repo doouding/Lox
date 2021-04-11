@@ -6,6 +6,7 @@ import java.util.Map;
 public class LoxClass implements LoxCallable {
     final String name;
     private final Map<String, LoxFunction> methods;
+    private final Map<String, LoxFunction> staticMethods;
 
     @Override
     public int arity() {
@@ -14,9 +15,10 @@ public class LoxClass implements LoxCallable {
         return initializer.arity();
     }
 
-    LoxClass(String name, Map<String, LoxFunction> methods) {
+    LoxClass(String name, Map<String, LoxFunction> methods, Map<String, LoxFunction> staticMethods) {
         this.name = name;
         this.methods = methods;
+        this.staticMethods = staticMethods;
     }
 
     LoxFunction findMethod(String name) {
@@ -42,5 +44,13 @@ public class LoxClass implements LoxCallable {
         }
 
         return instance;
+    }
+
+    public Object getStatic(Token name) {
+        if(staticMethods.containsKey(name.lexeme)) {
+            return staticMethods.get(name.lexeme);
+        }
+
+        throw new RuntimeError(name, "Can't find static method " + name.lexeme);
     }
 }
