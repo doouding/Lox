@@ -27,6 +27,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         NONE,
         FUNCTION,
         METHOD,
+        INITIALIZER
     }
 
     @Override
@@ -65,7 +66,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         scopes.peek().put("this", new VariableMeta(new Token(TokenType.THIS, "this", null, 0), false, true));
 
         for (Stmt.Function method : stmt.methods) {
-            FunctionType declaration = FunctionType.METHOD;
+            FunctionType declaration = method.name.lexeme == "init"
+                ? FunctionType.INITIALIZER
+                : FunctionType.METHOD;
             resolveFunction(method, declaration);
         }
 
@@ -166,6 +169,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
 
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                Lox.error(stmt.keyword, "Can't return from init function");
+            }
             resolve(stmt.value);
         }
 

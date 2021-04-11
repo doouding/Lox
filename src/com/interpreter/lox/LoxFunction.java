@@ -40,11 +40,10 @@ public class LoxFunction implements LoxCallable {
         try {
             interpreter.executeBlock(declaration.body, enviroment);
         } catch(Return returnValue) {
+            if (isInitializer) return cloure.getAt(0, "this");
             return returnValue.value;
         }
 
         return null;
     }
-
-
 }
