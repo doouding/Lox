@@ -31,3 +31,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [x] `break` and `contine` may have some bug in nested block
  - [x] Report error if local variable is never used
  - [x] Support static method
+ - [ ] Support `get` and `set` in class
