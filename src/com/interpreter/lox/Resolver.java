@@ -27,13 +27,19 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         NONE,
         FUNCTION,
         METHOD,
-        INITIALIZER
+        INITIALIZER,
+        STATIC_METHOD
     }
 
     @Override
     public Void visitThisExpr(Expr.This expr) {
         if (currentClass == ClassType.NONE) {
             Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
+            return null;
+        }
+
+        if (currentFunction != FunctionType.METHOD || currentFunction != FunctionType.INITIALIZER) {
+            Lox.error(expr.keyword, "Can't use 'this' outside of a instance method");
             return null;
         }
 
@@ -70,6 +76,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                 ? FunctionType.INITIALIZER
                 : FunctionType.METHOD;
             resolveFunction(method, declaration);
+        }
+
+        scopes.peek().remove("this");
+
+        for (Stmt.Function method : stmt.staticMethods) {
+            resolveFunction(method, FunctionType.STATIC_METHOD);
         }
 
         endScope();
