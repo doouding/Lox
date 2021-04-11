@@ -36,7 +36,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             return null;
         }
 
-        resolveLocal(expr, expr.keyword);
+        resolveLocal(expr, expr.keyword, true);
         return null;
     }
 
@@ -118,14 +118,14 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                 Lox.error(expr.name, "Can't read local variable in its own initializer.");
         }
 
-        resolveLocal(expr, expr.name);
+        resolveLocal(expr, expr.name, true);
         return null;
     }
 
     @Override
     public Void visitAssignExpr(Expr.Assign expr) {
         resolve(expr.value);
-        resolveLocal(expr, expr.name);
+        resolveLocal(expr, expr.name, false);
         return null;
     }
 
@@ -242,10 +242,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         endScope();
     }
 
-    private void resolveLocal(Expr expr, Token name) {
+    private void resolveLocal(Expr expr, Token name, Boolean isAccess) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {
-                scopes.get(i).get(name.lexeme).hasAccessed = true;
+                if(isAccess) {
+                    scopes.get(i).get(name.lexeme).hasAccessed = true;
+                }
                 interpreter.resolve(expr, scopes.size() - 1 - i);
                 return;
             }
@@ -296,7 +298,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         for(Map.Entry<String, VariableMeta> entry: scope.entrySet()) {
             VariableMeta meta = entry.getValue();
-            if (meta.hasAccessed && meta.name.type == TokenType.THIS) {
+            if (!meta.hasAccessed && meta.name.type != TokenType.THIS) {
                 Lox.error(meta.name, "Variable is defined but never used");
             }
         }
