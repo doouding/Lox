@@ -11,7 +11,7 @@ import java.util.List;
  *                | funDecl
  *                | statement ;
  *
- * classDecl      → "class" IDENTIFIER "{" ("static"? function)* "}" ;
+ * classDecl      → "class" IDENTIFIER "{" ( ("private"? IDENTIFIER) | ("static"? function) )* "}" ;
  * verDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
  * funDecl        → "fun" function ;
  * function       → IDENTIFIER "(" parameters? ")" block ;
@@ -92,20 +92,73 @@ public class Parser {
 
         List<Stmt.Function> methods = new ArrayList<>();
         List<Stmt.Function> staticMethods = new ArrayList<>();
+        List<Stmt.Function> privateMethods = new ArrayList<>();
+        List<Expr.Variable> fields = new ArrayList<>();
+        List<Expr.Variable> privateFields = new ArrayList<>();
 
         while(!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
             if(check(TokenType.STATIC)) {
                 advance();
+
                 staticMethods.add((Stmt.Function)function("staticMethod"));
             }
+            else if (check(TokenType.PRIVATE)) {
+                advance();
+                Object member = classMember("private");
+
+                if(member instanceof Expr.Variable) {
+                    privateFields.add((Expr.Variable)member);
+                }
+                else {
+                    privateMethods.add((Stmt.Function)member);
+                }
+            }
             else {
-                methods.add((Stmt.Function)function("method"));
+                Object member = classMember("");
+
+                if(member instanceof Expr.Variable) {
+                    fields.add((Expr.Variable)member);
+                }
+                else {
+                    methods.add((Stmt.Function)member);
+                }
             }
         }
 
         consume(TokenType.RIGHT_BRACE, "Expect '}' after class body");
 
-        return new Stmt.Class(name, methods, staticMethods);
+        return new Stmt.Class(name, methods, staticMethods, privateMethods, fields, privateFields);
+    }
+
+    private Object classMember(String kind) {
+        Token identifier = consume(TokenType.IDENTIFIER, "Expect class member name");
+
+        if(check(TokenType.SEMICOLON)) {
+            advance();
+            return new Expr.Variable(identifier);
+        }
+        else {
+            return finishFunction(kind + "Method", identifier);
+        }
+    }
+
+    private Stmt finishFunction(String kind, Token name) {
+        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if(!check(TokenType.RIGHT_PAREN)) {
+            do {
+                if(parameters.size() > 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+            } while (match(TokenType.COMMA));
+        }
+        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.LEFT_BRACE, "Expect '{' before bodyfun.");
+        List<Stmt> body = block();
+
+        return new Stmt.Function(name, parameters, body);
     }
 
     private Stmt function(String kind) {

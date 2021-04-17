@@ -35,6 +35,7 @@ public class Scanner {
         keywords.put("break",  TokenType.BREAK);
         keywords.put("continue", TokenType.CONTINUE);
         keywords.put("static", TokenType.STATIC);
+        keywords.put("private", TokenType.PRIVATE);
     }
 
     Scanner(String source) {

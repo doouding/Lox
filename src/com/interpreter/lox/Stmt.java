@@ -139,10 +139,13 @@ abstract class Stmt {
     final List<Stmt> body;
   }
   static class Class extends Stmt {
-    Class(Token name, List<Stmt.Function> methods, List<Stmt.Function> staticMethods) {
+    Class(Token name, List<Stmt.Function> methods, List<Stmt.Function> staticMethods, List<Stmt.Function> privateMethods, List<Expr.Variable> fields, List<Expr.Variable> privateFields) {
       this.name = name;
       this.methods = methods;
       this.staticMethods = staticMethods;
+      this.privateMethods = privateMethods;
+      this.fields = fields;
+      this.privateFields = privateFields;
     }
 
     @Override
@@ -153,6 +156,9 @@ abstract class Stmt {
     final Token name;
     final List<Stmt.Function> methods;
     final List<Stmt.Function> staticMethods;
+    final List<Stmt.Function> privateMethods;
+    final List<Expr.Variable> fields;
+    final List<Expr.Variable> privateFields;
   }
 
   abstract <R> R accept(Visitor<R> visitor);

@@ -40,7 +40,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         Object value = evaluate(expr.value);
-        ((LoxInstance)object).set(expr.name, value);
+        ((LoxInstance)object).set(expr.name, value, expr.object instanceof Expr.This);
 
         return null;
     }
@@ -48,9 +48,11 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Object visitGetExpr(Expr.Get expr) {
         Object object = evaluate(expr.object);
+
         if (object instanceof LoxInstance) {
-            return ((LoxInstance) object).get(expr.name);
+            return ((LoxInstance) object).get(expr.name, expr.object instanceof Expr.This);
         }
+
         if (object instanceof LoxClass) {
             return ((LoxClass) object).getStatic(expr.name);
         }
@@ -65,6 +67,10 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         Map<String, LoxFunction> methods = new HashMap<>();
         Map<String, LoxFunction> staticMethods = new HashMap<>();
+        Map<String, LoxFunction> privateMethods = new HashMap<>();
+        Map<String, LoxField> fields = new HashMap<>();
+        Map<String, LoxField> privateFields = new HashMap<>();
+
         for (Stmt.Function method : stmt.methods) {
             LoxFunction function = new LoxFunction(method, enviroment, method.name.lexeme.equals("init"));
             methods.put(method.name.lexeme, function);
@@ -75,7 +81,26 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             staticMethods.put(method.name.lexeme, function);
         }
 
-        LoxClass klass = new LoxClass(stmt.name.lexeme, methods, staticMethods);
+        for (Stmt.Function method : stmt.privateMethods) {
+            LoxFunction function = new LoxFunction(method, enviroment, false);
+            privateMethods.put(method.name.lexeme, function);
+        }
+
+        for (Expr.Variable field: stmt.fields) {
+            fields.put(field.name.lexeme, new LoxField(field.name));
+        }
+        for (Expr.Variable field: stmt.privateFields) {
+            privateFields.put(field.name.lexeme, new LoxField(field.name));
+        }
+
+        LoxClass klass = new LoxClass(
+            stmt.name.lexeme,
+            methods,
+            staticMethods,
+            privateMethods,
+            fields,
+            privateFields
+        );
         enviroment.assign(stmt.name, klass);
         return null;
     }

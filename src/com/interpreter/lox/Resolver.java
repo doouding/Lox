@@ -12,6 +12,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Stack<Map<String, VariableMeta>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
     private ClassType currentClass = ClassType.NONE;
+    private Stmt.Class currentClassStmt = null;
     private boolean insideLoop = false;
 
     Resolver(Interpreter interpreter) {
@@ -49,6 +50,31 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitSetExpr(Expr.Set expr) {
+        if(expr.object instanceof Expr.This && currentClass != ClassType.NONE) {
+            boolean existFlag = false;
+
+            for(int i = 0; i < currentClassStmt.privateFields.size(); i++) {
+                if(currentClassStmt.privateFields.get(i).name.lexeme.equals(expr.name.lexeme)) {
+                    existFlag = true;
+                    break;
+                }
+            }
+
+            if(!existFlag) {
+                for(int i = 0; i < currentClassStmt.fields.size(); i++) {
+                    if(currentClassStmt.fields.get(i).name.lexeme.equals(expr.name.lexeme)) {
+                        existFlag = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!existFlag) {
+                Lox.error(expr.name, "Cannot set field value without declaration");
+                return null;
+            }
+        }
+
         resolve(expr.value);
         resolve(expr.object);
         return null;
@@ -63,7 +89,9 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
         ClassType enclosingClass = currentClass;
+        Stmt.Class enclosingClassStmt = currentClassStmt;
         currentClass = ClassType.CLASS;
+        currentClassStmt = stmt;
 
         declare(stmt.name);
         define(stmt.name);
@@ -86,6 +114,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
         endScope();
         currentClass = enclosingClass;
+        currentClassStmt = enclosingClassStmt;
 
         return null;
     }
