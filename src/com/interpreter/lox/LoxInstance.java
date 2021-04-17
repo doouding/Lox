@@ -55,7 +55,7 @@ public class LoxInstance {
                 return klass.findPrivateMethod(name.lexeme).bind(this);
             }
             else {
-                throw new RuntimeError(name, "Can't access the private method \"" + name.lexeme + "\" outside the class.");
+                throw new RuntimeError(name, "Cannot access the private method \"" + name.lexeme + "\" outside the class.");
             }
         }
 

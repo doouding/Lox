@@ -35,12 +35,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitThisExpr(Expr.This expr) {
         if (currentClass == ClassType.NONE) {
-            Lox.error(expr.keyword, "Can't use 'this' outside of a class.");
+            Lox.error(expr.keyword, "Cannot use 'this' outside of a class.");
             return null;
         }
 
         if (currentFunction == FunctionType.STATIC_METHOD) {
-            Lox.error(expr.keyword, "'this' can only use inside of an instance method");
+            Lox.error(expr.keyword, "The keyword \"this\" can only use inside of a class method");
             return null;
         }
 
@@ -159,7 +159,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitVariableExpr(Expr.Variable expr) {
         if (!scopes.isEmpty() &&
             scopes.peek().get(expr.name.lexeme).hasInitialized == Boolean.FALSE) {
-                Lox.error(expr.name, "Can't read local variable in its own initializer.");
+                Lox.error(expr.name, "Cannot read local variable in its own initializer.");
         }
 
         resolveLocal(expr, expr.name, true);
@@ -206,12 +206,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
         if (currentFunction == FunctionType.NONE) {
-            Lox.error(stmt.keyword, "Can't return from top-level code.");
+            Lox.error(stmt.keyword, "Cannot return from top-level code.");
         }
 
         if (stmt.value != null) {
             if (currentFunction == FunctionType.INITIALIZER) {
-                Lox.error(stmt.keyword, "Can't return from init function");
+                Lox.error(stmt.keyword, "Cannot return from init function");
             }
             resolve(stmt.value);
         }

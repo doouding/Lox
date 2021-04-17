@@ -35,8 +35,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object object = evaluate(expr.object);
 
         if (!(object instanceof LoxInstance)) {
-            throw new RuntimeError(expr.name,
-                                   "Only instances have fields");
+            throw new RuntimeError(expr.name, "Only instances have fields");
         }
 
         Object value = evaluate(expr.value);

@@ -93,6 +93,6 @@ public class LoxClass implements LoxCallable {
             return staticMethods.get(name.lexeme);
         }
 
-        throw new RuntimeError(name, "Can't find static method " + name.lexeme);
+        throw new RuntimeError(name, "Cannot find static method " + name.lexeme);
     }
 }
