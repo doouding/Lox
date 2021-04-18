@@ -30,7 +30,7 @@ public class LoxInstance {
             return;
         }
 
-        throw new RuntimeError(name, "Cannot set field '" + name.lexeme + "' 'cause it's undefined");
+        throw new RuntimeError(name, "Field \"" + name.lexeme + "\" is not defined in the class \"" + klass.name + "\"");
     }
 
     Object get(Token name, boolean allowPrivate) {
