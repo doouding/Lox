@@ -33,3 +33,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Support `get` and `set` in class
  - [x] Support private field and method
  - [ ] Private field and method may have some bug
+ - [ ] Support class inheritance
