@@ -48,11 +48,11 @@ public class LoxInstance {
         }
 
         if (klass.hasMethod(name.lexeme)) {
-            return klass.findMethod(name.lexeme).bind(new LoxInstanceProxy(this));
+            return klass.findMethod(name.lexeme).bind(new LoxInstanceProxy(this, true));
         }
         if (klass.hasPrivateMethod(name.lexeme)) {
             if(allowPrivate) {
-                return klass.findPrivateMethod(name.lexeme).bind(new LoxInstanceProxy(this));
+                return klass.findPrivateMethod(name.lexeme).bind(new LoxInstanceProxy(this, true));
             }
             else {
                 throw new RuntimeError(name, "Cannot access the private method \"" + name.lexeme + "\" outside the class.");

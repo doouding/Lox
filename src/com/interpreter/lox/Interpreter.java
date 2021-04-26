@@ -39,7 +39,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         }
 
         Object value = evaluate(expr.value);
-        ((LoxInstanceProxy)object).set(expr.name, value, expr.object instanceof Expr.This);
+        ((LoxInstanceProxy)object).set(expr.name, value);
 
         return null;
     }
@@ -49,7 +49,7 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         Object object = evaluate(expr.object);
 
         if (object instanceof LoxInstanceProxy) {
-            return ((LoxInstanceProxy) object).get(expr.name, expr.object instanceof Expr.This);
+            return ((LoxInstanceProxy) object).get(expr.name);
         }
 
         if (object instanceof LoxClass) {

@@ -83,7 +83,7 @@ public class LoxClass implements LoxCallable {
         LoxFunction initializer = findMethod("init");
 
         if (initializer != null) {
-            initializer.bind(instance).call(interpreter, arguments);
+            initializer.bind(new LoxInstanceProxy(instance, true)).call(interpreter, arguments);
         }
 
         return instanceProxy;
