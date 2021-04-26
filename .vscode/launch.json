@@ -8,8 +8,7 @@
             "type": "java",
             "name": "Launch AstPrinter",
             "request": "launch",
-            "mainClass": "com.interpreter.lox.AstPrinter",
-            "projectName": "jlox_6d94333c"
+            "mainClass": "com.interpreter.lox.AstPrinter"
         },
         {
             "type": "java",
@@ -22,21 +21,18 @@
             "name": "Launch App",
             "request": "launch",
             "mainClass": "App",
-            "projectName": "jlox_6d94333c"
         },
         {
             "type": "java",
             "name": "Launch Lox",
             "request": "launch",
             "mainClass": "com.interpreter.lox.Lox",
-            "projectName": "jlox_6d94333c"
         },
         {
             "type": "java",
             "name": "Launch GenerateAst",
             "request": "launch",
             "mainClass": "com.interpreter.tool.GenerateAst",
-            "projectName": "jlox_6d94333c",
             "args": "${workspaceFolder}/src/com/interpreter/lox"
         }
     ]
