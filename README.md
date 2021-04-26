@@ -27,9 +27,9 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [ ] Support `--` and `++` operator
  - [ ] Wrap with readline
  - [x] Improve `break` and `continue` implementation
- - [ ] Support private field in class
  - [x] `break` and `contine` may have some bug in nested block
  - [x] Report error if local variable is never used
  - [x] Support static method
  - [ ] Support `get` and `set` in class
- - [ ] Support private field and method
+ - [x] Support private field and method
+ - [ ] Private field and method may have some bug
