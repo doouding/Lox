@@ -79,13 +79,14 @@ public class LoxClass implements LoxCallable {
         }
 
         LoxInstance instance = new LoxInstance(this, privateFields, fields);
+        LoxInstanceProxy instanceProxy = new LoxInstanceProxy(instance, false);
         LoxFunction initializer = findMethod("init");
 
         if (initializer != null) {
             initializer.bind(instance).call(interpreter, arguments);
         }
 
-        return instance;
+        return instanceProxy;
     }
 
     public Object getStatic(Token name) {
