@@ -34,7 +34,7 @@ import java.util.List;
  * printStmt      → "print" expression ";";
  * exprStmt       → expression ";";
  *
- * expression     → equality ;
+ * expression     → assignment ;
  * assignment     → ( call "." )? IDENTIFIER "=" assignment
  *                | logic_or
  *
@@ -46,9 +46,13 @@ import java.util.List;
  * term           → factor ( ( "-" | "+" ) factor )* ;
  * factor         → unary ( ( "/" | "*" ) unary )* ;
  * unary          → ( "!" | "-" ) unary
- *                | call ;
+ *                | selfOp ;
+ *
+ * selfOp         → ( "--" | "++" ) IDENTIFIER
+ *                | IDENTIFIER ( "--" | "++" )
+ *                | call;
  * call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
- * arguments      → expression ( "," expression )
+ * arguments      → expression ( "," expression );
  * primary        → NUMBER | STRING | "true" | "false" | "nil"
  *                | "(" expression ")" 
  *                | IDENTIFIER ;
@@ -415,6 +419,29 @@ public class Parser {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
+        }
+
+        return selfOp();
+    }
+
+    private Expr selfOp() {
+        if(match(TokenType.DECREMENT, TokenType.INCREMENT)) {
+            Token op = previous();
+            Token variable = consume(TokenType.IDENTIFIER, "Expect identifier after '" + op.lexeme + "' operator.");
+
+            return Expr.SelfOp(variable, op, true);
+        }
+        else if(match(TokenType.IDENTIFIER)) {
+            Token variable = previous();
+
+            if(match(TokenType.DECREMENT) || match(TokenType.INCREMENT)) {
+                Token op = previous();
+
+                return Expr.SelfOp(variable, op, false);
+            }
+            else {
+                current--;
+            }
         }
 
         return call();
