@@ -1,11 +1,11 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import com.interpreter.lox.Stmt.Var;
+import org.doouding.lox.Stmt.Var;
 
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;

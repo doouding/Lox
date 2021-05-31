@@ -1,4 +1,4 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 public class LoxField {
     Token name;

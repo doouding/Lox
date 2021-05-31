@@ -1,4 +1,4 @@
-package com.interpreter.tool;
+package org.doouding.lox.tool;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -49,7 +49,7 @@ public class GenerateAst {
         String path = outputDir + "/" + baseName + ".java";
         PrintWriter writer = new PrintWriter(path, "UTF-8");
 
-        writer.println("package com.interpreter.lox;");
+        writer.println("package org.doouding.lox;");
         writer.println();
         writer.println("import java.util.List;");
         writer.println();

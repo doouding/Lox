@@ -1,4 +1,4 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 import java.util.ArrayList;
 import java.util.List;

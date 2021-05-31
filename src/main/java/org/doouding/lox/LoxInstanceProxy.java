@@ -1,4 +1,4 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 public class LoxInstanceProxy {
     private LoxInstance instance;

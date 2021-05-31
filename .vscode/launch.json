@@ -6,34 +6,23 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Launch AstPrinter",
-            "request": "launch",
-            "mainClass": "com.interpreter.lox.AstPrinter"
-        },
-        {
-            "type": "java",
             "name": "Launch Current File",
             "request": "launch",
             "mainClass": "${file}"
         },
         {
             "type": "java",
-            "name": "Launch App",
-            "request": "launch",
-            "mainClass": "App",
-        },
-        {
-            "type": "java",
             "name": "Launch Lox",
             "request": "launch",
-            "mainClass": "com.interpreter.lox.Lox",
+            "mainClass": "org.doouding.lox.Lox",
+            "projectName": "interpreter"
         },
         {
             "type": "java",
             "name": "Launch GenerateAst",
             "request": "launch",
-            "mainClass": "com.interpreter.tool.GenerateAst",
-            "args": "${workspaceFolder}/src/com/interpreter/lox"
+            "mainClass": "org.doouding.lox.tool.GenerateAst",
+            "projectName": "interpreter"
         }
     ]
 }

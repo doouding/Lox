@@ -1,4 +1,4 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 public class Return extends RuntimeException {
     final Object value;

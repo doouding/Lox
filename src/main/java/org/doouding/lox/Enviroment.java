@@ -1,11 +1,11 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Enviroment {
     final Enviroment enclosing;
-    private final Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new HashMap<String, Object>();
 
     Enviroment() {
         enclosing = null;

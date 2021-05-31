@@ -1,4 +1,4 @@
-package com.interpreter.lox;
+package org.doouding.lox;
 
 public class Terminate extends RuntimeException {
     final Token token;
