@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-An interpreter built in Java.
+A tree-walk interpreter written in Java.
 
 ## Folder Structure
 
