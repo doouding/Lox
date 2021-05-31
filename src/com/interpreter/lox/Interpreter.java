@@ -6,8 +6,19 @@ import java.util.Map;
 import java.util.HashMap;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    /**
+     * 全局 Enviroment
+     */
     final Enviroment globals = new Enviroment();
+
+    /**
+     * 当前执行代码所处的 Enviroment
+     */
     private Enviroment enviroment = globals;
+
+    /**
+     * 变量所处的 Enviroment 深度
+     */
     private final Map<Expr, Integer> locals = new HashMap<>();
 
     Interpreter() {
@@ -319,6 +330,26 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
         enviroment.define(stmt.name.lexeme, value);
         return null;
+    }
+
+    @Override
+    public Object visitSelfOpExpr(Expr.SelfOp expr) {
+        Object variable = lookUpVariable(expr.name, expr);
+
+        checkNumberOperand(expr.operator, variable);
+        Integer distance = locals.get(expr);
+        Double calculatedValue = expr.operator.type == TokenType.DECREMENT
+            ? (Double)variable - 1
+            : (Double)variable + 1;
+
+        if (distance != null) {
+            enviroment.assignAt(distance, expr.name, calculatedValue);
+        }
+        else {
+            globals.assign(expr.name, calculatedValue);
+        }
+
+        return expr.left ? calculatedValue : variable;
     }
 
     @Override

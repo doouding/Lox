@@ -288,6 +288,10 @@ public class Parser {
         return new Stmt.Print(expr);
     }
 
+    /**
+     * 当处于 REPL 并且是行末尾时可以省略分号
+     * @return
+     */
     private Boolean shouldConsumeSemicolon() {
         return !Lox.isREPL || !isAtEnd();
     }
@@ -429,15 +433,16 @@ public class Parser {
             Token op = previous();
             Token variable = consume(TokenType.IDENTIFIER, "Expect identifier after '" + op.lexeme + "' operator.");
 
-            return Expr.SelfOp(variable, op, true);
+            return new Expr.SelfOp(variable, op, true);
         }
-        else if(match(TokenType.IDENTIFIER)) {
-            Token variable = previous();
+        else if(check(TokenType.IDENTIFIER)) {
+            Token variable = peek();
+            advance();
 
             if(match(TokenType.DECREMENT) || match(TokenType.INCREMENT)) {
                 Token op = previous();
 
-                return Expr.SelfOp(variable, op, false);
+                return new Expr.SelfOp(variable, op, false);
             }
             else {
                 current--;

@@ -14,6 +14,7 @@ abstract class Expr {
     R visitLiteralExpr(Literal expr);
     R visitUnaryExpr(Unary expr);
     R visitConditionalExpr(Conditional expr);
+    R visitSelfOpExpr(SelfOp expr);
     R visitVariableExpr(Variable expr);
     R visitLogicalExpr(Logical expr);
   }
@@ -159,6 +160,22 @@ abstract class Expr {
     final Expr condition;
     final Expr stat1;
     final Expr stat2;
+  }
+  static class SelfOp extends Expr {
+    SelfOp(Token name, Token operator, Boolean left) {
+      this.name = name;
+      this.operator = operator;
+      this.left = left;
+    }
+
+    @Override
+    <R> R accept(Visitor<R> visitor) {
+      return visitor.visitSelfOpExpr(this);
+    }
+
+    final Token name;
+    final Token operator;
+    final Boolean left;
   }
   static class Variable extends Expr {
     Variable(Token name) {
