@@ -1,5 +1,6 @@
 package org.doouding.lox;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +8,11 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import org.jline.terminal.TerminalBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.UserInterruptException;
+import org.jline.reader.LineReader;
 
 public class Lox {
     private static final Interpreter interpreter = new Interpreter();
@@ -23,15 +29,18 @@ public class Lox {
     }
 
     private static void runPrompt() throws IOException {
-        InputStreamReader input = new InputStreamReader(System.in);
-        BufferedReader reader = new BufferedReader(input);
+        Terminal terminal = TerminalBuilder.builder().system(true).build();
+        LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).build();
 
         for (;;) {
-            System.out.print("> ");
-            String line = reader.readLine();
-            if (line == null) break;
-            run(line);
-            hadError = false;
+            try {
+                String line = lineReader.readLine("> ");
+                if (line == null) break;
+                run(line);
+                hadError = false;
+            } catch (UserInterruptException e) {
+                System.exit(0);
+            }
         }
     }
 
