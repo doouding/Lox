@@ -24,7 +24,7 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [x] Add support for ommiting semicolon in repl mode
  - [ ] Support return function directly
  - [ ] Support anonymous function
- - [ ] Support `--` and `++` operator
+ - [x] Support `--` and `++` operator
  - [ ] Wrap with readline
  - [x] Improve `break` and `continue` implementation
  - [x] `break` and `contine` may have some bug in nested block
