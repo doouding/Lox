@@ -34,3 +34,4 @@ The `JAVA DEPENDENCIES` view allows you to manage your dependencies. More detail
  - [x] Support private field and method
  - [x] Private field and method may have some bug
  - [ ] Support class inheritance
+ - [ ] Add Visual Studio Code Extension
