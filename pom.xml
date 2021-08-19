@@ -5,10 +5,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.doouding.lox</groupId>
-    <artifactId>interpreter</artifactId>
+    <artifactId>jlox</artifactId>
     <version>1.0.0</version>
     
-    <name>interpreter</name>
+    <name>jlox</name>
     <dependencies>
         <dependency>
             <groupId>org.jline</groupId>
@@ -20,5 +20,5 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-      </properties>
+    </properties>
 </project>
