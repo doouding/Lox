@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import org.doouding.lox.Stmt.Var;
-
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, VariableMeta>> scopes = new Stack<>();
-    private FunctionType currentFunction = FunctionType.NONE;
+    private FunctionType currentFunctionType = FunctionType.NONE;
     private ClassType currentClass = ClassType.NONE;
     private Stmt.Class currentClassStmt = null;
     private boolean insideLoop = false;
@@ -39,7 +37,7 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             return null;
         }
 
-        if (currentFunction == FunctionType.STATIC_METHOD) {
+        if (currentFunctionType == FunctionType.STATIC_METHOD) {
             Lox.error(expr.keyword, "The keyword \"this\" can only use inside of a class method");
             return null;
         }
@@ -167,11 +165,6 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitVariableExpr(Expr.Variable expr) {
-        if (!scopes.isEmpty() &&
-            scopes.peek().get(expr.name.lexeme).hasInitialized == Boolean.FALSE) {
-                Lox.error(expr.name, "Cannot read local variable in its own initializer.");
-        }
-
         resolveLocal(expr, expr.name, true);
         return null;
     }
@@ -215,12 +208,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     @Override
     public Void visitReturnStmt(Stmt.Return stmt) {
-        if (currentFunction == FunctionType.NONE) {
+        if (currentFunctionType == FunctionType.NONE) {
             Lox.error(stmt.keyword, "Cannot return from top-level code.");
         }
 
         if (stmt.value != null) {
-            if (currentFunction == FunctionType.INITIALIZER) {
+            if (currentFunctionType == FunctionType.INITIALIZER) {
                 Lox.error(stmt.keyword, "Cannot return from init function");
             }
             resolve(stmt.value);
@@ -284,8 +277,8 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
 
     private void resolveFunction(Stmt.Function function, FunctionType type) {
-        FunctionType enclosingFunction = currentFunction;
-        currentFunction = type;
+        FunctionType enclosingFunctionType = currentFunctionType;
+        currentFunctionType = type;
 
         beginScope();
 
@@ -294,16 +287,25 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             define(param);
         }
         resolve(function.body);
-        currentFunction = enclosingFunction;
+        currentFunctionType = enclosingFunctionType;
 
         endScope();
     }
 
+    /**
+     * Resolve a local variable.
+     * @param expr the expression that contains the variable
+     * @param name the variable name
+     * @param isAccess whether the variable is accessed, false value indicate this is an assignment
+     */
     private void resolveLocal(Expr expr, Token name, Boolean isAccess) {
         for (int i = scopes.size() - 1; i >= 0; i--) {
             if (scopes.get(i).containsKey(name.lexeme)) {
                 if(isAccess) {
                     scopes.get(i).get(name.lexeme).hasAccessed = true;
+                }
+                if(scopes.get(i).get(name.lexeme).hasInitialized == false) {
+                    Lox.error(name.line, "Cannot read local variable in its own initializer.");
                 }
                 interpreter.resolve(expr, scopes.size() - 1 - i);
                 return;
